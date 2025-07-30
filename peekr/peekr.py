@@ -4,6 +4,7 @@
     
 import getopt
 import locale
+import os
 import sys
 
 class MessageDisplay:
@@ -140,9 +141,17 @@ def init_args(options:dict[str,str]):
     for opt, val in args:
         match opt:
             case "-l" | "--ui-lang":
-                pass
+                lang = val.strip(" ").lower()
+                # Check if the language is supported
+                if len(lang) > 0 and MessageDisplay.MESSAGES.get(lang,None) is not None: 
+                    options["ui-lang"] = lang
+                else:
+                    options["ui-lang"] = "en"
             case "-d" | "--directory":
-                pass
+                if os.path.isdir(val):
+                    options["directory"] = val
+                else:
+                    print(MessageDisplay.error("pictures_directory_not_found_interactive"))
             case "-r" | "--recursive":
                 options["recursive"] = True
             case "-k" | "--keywords":
@@ -151,7 +160,11 @@ def init_args(options:dict[str,str]):
                     keywords.remove("")
                 options["keywords"] = keywords
             case "-o", "--output":
-                pass
+                if os.path.isdir(val):
+                    options["output"] = val
+                else:
+                    MessageDisplay.error("output")
+                    sys.exit(1)
             case "-L" | "--lang":
                 lang = val.lower()
                 if lang == 'f':
