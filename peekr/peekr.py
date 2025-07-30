@@ -3,9 +3,45 @@
 
     
 import getopt
+import os
 import sys
 
 
+def init_args(options:dict[str,str]):
+    
+    args = extract_cli_args()
+    
+    for opt, val in args:
+        match opt:
+            case "-l" | "--ui-lang":
+                pass
+            case "-d" | "--directory":
+                pass
+            case "-r" | "--recursive":
+                options["recursive"] = True
+            case "-k" | "--keywords":
+                keywords = val.split(",")
+                if "" in keywords:
+                    keywords.remove("")
+                options["keywords"] = keywords
+            case "-o", "--output":
+                pass
+            case "-L" | "--lang":
+                lang = val.lower()
+                if lang == 'f':
+                    options["lang"] = 'fra'
+                elif lang == 'a':
+                    options["lang"] = 'ara'
+            case "-I" | "--interactive":
+                pass
+            case "-c" | "--case-sensitive":
+                options["case-sensitive"] = True
+            case "-h" | "--help":
+                print_help()
+                sys.exit(0)
+            case _:
+                print("Invalid argument.")
+                
 def extract_cli_args():
     try:
         opts, _ = getopt.getopt(sys.argv[1:], "hIcrd:k:l:L:o:", ["directory=", "keyword=", "case-sensitive", "interactive","recursive" ,"lang=", "output=", "ui-lang="])
