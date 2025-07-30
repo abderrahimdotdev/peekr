@@ -25,24 +25,27 @@ A Python tool to perform Optical Character Recognition (OCR) in a directory of i
 git clone https://github.com/abderrahimdotdev/peekr.git
 cd peekr 
 ```
-### 2. Install Python dependencies
+
+### 2. Create a virtual environment
+```
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+### 3. Install Python dependencies
 ```bash
-pipx install uv
+pip3 install -r requirements.txt
 # or
-pip install uv
-
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
+pip3 install uv
 ```
 
 ## 🛠️ Usage
 Run the tool from the command line to perform OCR and search for text in images.
 
 ```bash
-uv run peekr.py --directory /path/to/images --keyword "word1, word2"
+uv run -m peekr --directory /path/to/images --keyword "word1, word2"
 # or
-python peekr.py --directory /path/to/images --keyword "word1, word2"
+python3 -m peekr --directory /path/to/images --keyword "word1, word2"
 ```
 To run in interactive mode:
 ``` bash
@@ -68,13 +71,7 @@ python peekr.py --interactive
 
 ## 🧪 Requirements
 - Python 3.13+
-- Tesseract OCR
-- Python packages:
-  - pytesseract
-  - getopt
-  - cv2
-  - texttable
-  - filetype
+- `uv` (install via `pip install uv` or follow [installation instructions](https://docs.astral.sh/uv/getting-started/installation/))
 
 ## 📁 Project Structure
 
