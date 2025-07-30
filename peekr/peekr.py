@@ -10,6 +10,8 @@ import timeit
 import filetype
 import cv2
 import pytesseract
+from texttable import Texttable
+
 class MessageDisplay:
     MESSAGES = {
         "en":{
@@ -34,7 +36,7 @@ class MessageDisplay:
                 "output":"Directory already exists.",
                 "yes_no":"Type [Y] for Yes or [N] for No.",
             },
-            "summary_text":{
+            "labels":{
                 "headline":"Summary",
                 "total_pictures":"Total pictures scanned:\t\t",
                 "runtime":"Estimated runtime:\t\t",
@@ -68,7 +70,7 @@ class MessageDisplay:
                 "output":"Dossier existe déja.",
                 "yes_no":"Taper [O] pour Oui, [N] pour Non.",
             },
-            "summary_text":{
+            "labels":{
                 "headline":"Résultat",
                 "total_pictures":"Nombre des images scanné(s):\t\t",
                 "runtime":"La recherche a pris:\t\t",
@@ -119,7 +121,7 @@ class MessageDisplay:
     
     @staticmethod
     def prompt(key:str):
-        return MessageDisplay.MESSAGES[OPTIONS["ui-lang"]]['prompt'][key]
+        return MessageDisplay.MESSAGES[OPTIONS["ui-lang"]]['prompts'][key]
     @staticmethod
     def error(key:str):
         return MessageDisplay.MESSAGES[OPTIONS["ui-lang"]]['errors'][key]
@@ -222,6 +224,37 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     bar = fill * filled_length + '-' * (length - filled_length)
     print(f'\r\033[1;35m{prefix} |{bar}| {percent}% {suffix}\033[0m', end=print_end, flush=True)
 
+def print_summary(data:dict):
+    print("\n\n\033[1;33m=========================================\033[0m")
+    print(f"\033[1;33m{MessageDisplay.label('headline')}\033[0m")
+    print("\033[1;33m=========================================\033[0m")
+    print(f"\033[1;33m{MessageDisplay.label('total_pictures')}{data.get('total_images')}\033[0m")
+    print(f"\033[1;33m{MessageDisplay.label('runtime')}{data['runtime']}\033[0m")
+    print()
+    
+    table = Texttable()
+    table.add_rows([[MessageDisplay.label("keyword"), MessageDisplay.label("keyword_found")]])
+    found_something = False
+    for keyword in data.get("keywords"):
+        if data.get(keyword).get("count") > 0:
+            found_something = True
+        table.add_row([keyword,f"{data.get(keyword).get('count')} {MessageDisplay.label("pictures") if data.get(keyword).get('count') > 1 else MessageDisplay.label("picture")}"])
+    
+    print(f"\033[1;32m{table.draw()}\033[0m")
+    if found_something:
+        print(f"\033[1;33m{MessageDisplay.label('see_results')}\033[0m", end="")
+        answer = input("\033[1;33m>>\033[0m ").strip(" ").lower()
+        while answer not in MessageDisplay.prompt("valid_answers").get("all"):
+            print(MessageDisplay.error("yes_no"))
+            answer = input("\033[1;33m>>\033[0m ").strip(" ").lower()
+        if answer in MessageDisplay.prompt("valid_answers").get("yes"):
+            for keyword in data.get("keywords"):
+                    if data.get(keyword).get("count") > 0:
+                        for image_path in data.get(keyword).get("paths"):
+                            print(f"\033[1;33mOpening {image_path}...\033[0m")
+            
+
+
 def print_help():
     print("""
     Search text in multiple images using tesseract (an OCR — Optical Character Recognition — tool powered by Google.
@@ -269,6 +302,7 @@ def main():
     summary["end_time"] = timeit.default_timer()
     summary["runtime"] = f"{int(summary.get('end_time') - summary.get('start_time'))} seconds"
 
+    print_summary(summary)
     
 
 
