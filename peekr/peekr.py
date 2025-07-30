@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 
 
+    
+import getopt
+import sys
+
+
+def extract_cli_args():
+    try:
+        opts, _ = getopt.getopt(sys.argv[1:], "hIcrd:k:l:L:o:", ["directory=", "keyword=", "case-sensitive", "interactive","recursive" ,"lang=", "output=", "ui-lang="])
+        if len(opts) == 0:
+            print_help()
+            sys.exit(0)
+        else:
+            return opts
+    except getopt.GetoptError:
+        print("Invalid usage.",file = sys.stderr)
+        print_help()
+        sys.exit(1)
+
 def print_help():
     print("""
     Search text in multiple images using tesseract (an OCR — Optical Character Recognition — tool powered by Google.
