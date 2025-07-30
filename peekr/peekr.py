@@ -8,7 +8,8 @@ import os
 import sys
 import timeit
 import filetype
-
+import cv2
+import pytesseract
 class MessageDisplay:
     MESSAGES = {
         "en":{
@@ -210,6 +211,10 @@ def get_images_in_dir(folder: str,recursive:bool=False):
                 
     return image_files
 
+def get_text_in_image(image_path: str, lang: str):
+    img = cv2.imread(image_path)
+    text_inside_image = pytesseract.image_to_string(img, lang=lang)
+    return text_inside_image
 
 def print_help():
     print("""
@@ -242,6 +247,21 @@ def main():
         summary[keyword] = {}
         summary[keyword]["count"] = 0
         summary[keyword]["paths"] = []
+    for index, image_file_path in enumerate(images):
+        image_text = get_text_in_image(image_file_path, "eng")
+        for keyword in OPTIONS["keywords"]:
+            if OPTIONS["case-sensitive"] is True:
+                result = keyword in image_text
+            else:
+                result = keyword.lower() in image_text.lower()
+            if result:
+                summary[keyword]["paths"] += [image_file_path]
+                summary[keyword]["count"] += 1
+
+
+    summary["end_time"] = timeit.default_timer()
+    summary["runtime"] = f"{int(summary.get('end_time') - summary.get('start_time'))} seconds"
+
     
 
 
