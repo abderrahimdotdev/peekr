@@ -153,7 +153,6 @@ class InteractiveArgsHandler:
         self.__get_keywords(options)
         self.__is_case_sensitive(options)
         
-        
 
     def __get_images_folder(self,options:dict[str,str]):
         print_headline(MessageDisplay.prompt('pictures_directory'))
@@ -196,8 +195,6 @@ class InteractiveArgsHandler:
         if answer in MessageDisplay.prompt("valid_answers").get("yes"):
             options["recursive"] = True
         print()
-
-    
     
         
     
@@ -293,7 +290,7 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
     bar = fill * filled_length + '-' * (length - filled_length)
-    print(f'\r\033[1;35m{prefix} |{bar}| {percent}% {suffix}\033[0m', end=print_end, flush=True)
+    print(f'\r\033[1;32m{prefix} |{bar}| {percent}% {suffix}\033[0m', end=print_end, flush=True)
 
 def print_summary(data:dict):
     print("\n\n\033[1;33m=========================================\033[0m")
@@ -311,7 +308,7 @@ def print_summary(data:dict):
             found_something = True
         table.add_row([keyword,f"{data.get(keyword).get('count')} {MessageDisplay.label("pictures") if data.get(keyword).get('count') > 1 else MessageDisplay.label("picture")}"])
     
-    print(f"\033[1;32m{table.draw()}\033[0m")
+    print(f"\033[1;33m{table.draw()}\033[0m")
     if found_something:
         print(f"\033[1;33m{MessageDisplay.label('see_results')}\033[0m", end="")
         answer = input("\033[1;33m>>\033[0m ").strip(" ").lower()
@@ -325,10 +322,9 @@ def print_summary(data:dict):
                             print(f"\033[1;33mOpening {image_path}...\033[0m")
             
 def print_headline(msg: str):
-    print(f"\033[1;33m{len(msg) * '='}\033[0m")
-    print(f"\033[1;33m{msg}\033[0m")
-    print(f"\033[1;33m{len(msg) * '='}\033[0m")
-
+    print(f"\033[1;32m{len(msg) * '='}\033[0m")
+    print(f"\033[1;32m{msg}\033[0m")
+    print(f"\033[1;32m{len(msg) * '='}\033[0m")
 
 def print_help():
     print("""
