@@ -17,6 +17,7 @@ class MessageDisplay:
         "en":{
             "prompts":{
                 "pictures_directory":"Path to the pictures directory : ",
+                "recursive":"You want to perform a recursive search ? [Y]es / [N]o",
                 "keywords":"Type your keyword(s) separated by a comma [,]: ",
                 "case-sensitive":"Do you want to perform a case-sensitive search ? [Y]es / [N]o",
                 "lang":"Choose your desired language: ",
@@ -32,6 +33,7 @@ class MessageDisplay:
                 "pictures_directory_not_found_batch":"Directory not found. Aborting.",
                 "empty_keywords":"At lease 1 keyword is required.",
                 "case-sensitive":"Invalid Answer. Type [Y] for case-sensitive search, [N] or leave blank for case-insensitive search.",
+                "recursive":"Please select [Y]es or [N]o.",
                 "lang":"Invalid Answer. The chosen language is not supported.",
                 "output":"Directory already exists.",
                 "yes_no":"Type [Y] for Yes or [N] for No.",
@@ -51,6 +53,7 @@ class MessageDisplay:
         "fr":{
             "prompts":{
                 "pictures_directory":"Chemin du répertoire qui contient les images ",
+                "recursive":"Voulez-vous effectuer une recherche recursive ? [O]ui / [N]on",
                 "keywords":"Tapez les mots-clés que vous recherchez",
                 "case-sensitive":"Voulez-vous effectuer une recherche sensible à la case ? [O]ui / [N]on",
                 "lang":"Language utilisé dans la recherche [fr]",
@@ -66,6 +69,7 @@ class MessageDisplay:
                 "pictures_directory_not_found_batch":"Chemin du dosser introuvable.",
                 "empty_keywords":"Vous devez saisir un mot à rechercher.",
                 "case-sensitive":"Réponses non valide. Tapez [O] pour une recherche sensible à la case, [N] ou laisser vide pour une rechercher non-sensible à la case .",
+                "recursive":"Merci de choisir entre [O]ui ou [N]on.",
                 "lang":"Réponse invalide. La langue choisi n'est pas supporté.",
                 "output":"Dossier existe déja.",
                 "yes_no":"Taper [O] pour Oui, [N] pour Non.",
@@ -86,6 +90,7 @@ class MessageDisplay:
         "dr":{
             "prompts":{
                 "pictures_directory":"Fin kaynin tsawrk ? ",
+                "recursive":"Bghiti t9alab f wst lmilafat li ldakhl ?",
                 "keywords":"3layach kat9alab ?",
                 "case-sensitive":"Kayhmk lfar9 bin minuscule w majuscule ? [W]ah / [L]a",
                 "lang":"Dakchi li kat9leb 3lih b achmen logha ?",
@@ -102,6 +107,7 @@ class MessageDisplay:
                 "empty_keywords":"Makaymknch tb9a khawya, khas 3el a9al chi kelma t9lb 3liha.",
                 "case-sensitive":"Invalid Answer. Type [Y] for case-sensitive search, [N] or leave blank for case-insensitive search.",
                 "lang":"Invalid Answer. The chosen language is not supported.",
+                "recursive":"Wah wla La ?",
                 "output":"Directory already exists.",
                 "yes_no":"Ktab [W] bach tgol [Wah], [L] bach tgol [La].",
             },
@@ -139,12 +145,80 @@ OPTIONS: dict[str,str] = {
         "recursive":False,
         }
 
+class InteractiveArgsHandler:
+
+    def run(self,options:dict[str,str]):
+        self.__get_images_folder(options)
+        self.__get_recursive_search(options)
+        self.__get_keywords(options)
+        self.__is_case_sensitive(options)
+        
+        
+
+    def __get_images_folder(self,options:dict[str,str]):
+        print_headline(MessageDisplay.prompt('pictures_directory'))
+        images_directory = normalize_path(input(">> ").strip("'").strip("\""))
+        while len(images_directory) == 0 or not os.path.isdir(f"{images_directory}"):
+            print(MessageDisplay.error('pictures_directory_not_found_interactive'))
+            images_directory = input(">> ").strip(" ").strip("'").strip("\"")
+        print()
+        options["directory"] = images_directory
+
+    def __get_keywords(self,options:dict[str,str]):
+        print_headline(MessageDisplay.prompt('keywords'))
+        keywords = input(">> ").strip(" ")
+        while len(keywords) == 0:
+            print(MessageDisplay.error('keywords'))
+            keywords = input(">> ").strip(" ")
+        keywords = keywords.split(",")
+        if "" in keywords:
+            keywords.remove("")
+        options["keywords"] = keywords
+        print()
+
+    def __is_case_sensitive(self,options:dict[str,str]):
+        print_headline(MessageDisplay.prompt('case-sensitive'))
+        options["case-sensitive"] = False
+        answer = input(">> ").strip(" ").lower()
+        while answer not in MessageDisplay.prompt("valid_answers").get("all"):
+            print(MessageDisplay.error('case-sensitive'))
+            answer = input(">> ").strip(" ").lower()
+        if answer in MessageDisplay.prompt("valid_answers").get("yes"):
+            options["case-sensitive"] = False
+        print()
+        
+    def __get_recursive_search(self, options:dict[str, str]):
+        print_headline(MessageDisplay.prompt('recursive'))
+        answer = input(">> ").strip(" ").lower()
+        while answer not in MessageDisplay.prompt("valid_answers").get("all"):
+            print(MessageDisplay.error('recursive'))
+            answer = input(">> ").strip(" ").lower()
+        if answer in MessageDisplay.prompt("valid_answers").get("yes"):
+            options["recursive"] = True
+        print()
+
+    
+    
+        
+    
+    
+
+def normalize_path(path:str):
+    return os.path.expanduser(os.path.normpath(path))
+
 def init_args(options:dict[str,str]):
     
     args = extract_cli_args()
     
     for opt, val in args:
         match opt:
+            case "-I" | "--interactive":
+                interactive_manager = InteractiveArgsHandler()
+                interactive_manager.run(options)
+                return
+            case "-h" | "--help":
+                print_help()
+                sys.exit(0)
             case "-l" | "--ui-lang":
                 lang = val.strip(" ").lower()
                 # Check if the language is supported
@@ -153,8 +227,9 @@ def init_args(options:dict[str,str]):
                 else:
                     options["ui-lang"] = "en"
             case "-d" | "--directory":
-                if os.path.isdir(val):
-                    options["directory"] = val
+                normalized_path = normalize_path(val)
+                if os.path.isdir(normalized_path):
+                    options["directory"] = normalized_path
                 else:
                     print(MessageDisplay.error("pictures_directory_not_found_interactive"))
             case "-r" | "--recursive":
@@ -165,8 +240,9 @@ def init_args(options:dict[str,str]):
                     keywords.remove("")
                 options["keywords"] = keywords
             case "-o", "--output":
-                if os.path.isdir(val):
-                    options["output"] = val
+                normalized_path = normalize_path(val)
+                if os.path.isdir(normalized_path):
+                    options["output"] = normalized_path
                 else:
                     MessageDisplay.error("output")
                     sys.exit(1)
@@ -176,13 +252,8 @@ def init_args(options:dict[str,str]):
                     options["lang"] = 'fra'
                 elif lang == 'a':
                     options["lang"] = 'ara'
-            case "-I" | "--interactive":
-                pass
             case "-c" | "--case-sensitive":
                 options["case-sensitive"] = True
-            case "-h" | "--help":
-                print_help()
-                sys.exit(0)
             case _:
                 print("Invalid argument.")
                 
@@ -253,6 +324,10 @@ def print_summary(data:dict):
                         for image_path in data.get(keyword).get("paths"):
                             print(f"\033[1;33mOpening {image_path}...\033[0m")
             
+def print_headline(msg: str):
+    print(f"\033[1;33m{len(msg) * '='}\033[0m")
+    print(f"\033[1;33m{msg}\033[0m")
+    print(f"\033[1;33m{len(msg) * '='}\033[0m")
 
 
 def print_help():
