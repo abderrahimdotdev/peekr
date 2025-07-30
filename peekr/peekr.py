@@ -216,6 +216,12 @@ def get_text_in_image(image_path: str, lang: str):
     text_inside_image = pytesseract.image_to_string(img, lang=lang)
     return text_inside_image
 
+def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=26, fill='█', print_end="\r"):
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filled_length = int(length * iteration // total)
+    bar = fill * filled_length + '-' * (length - filled_length)
+    print(f'\r\033[1;35m{prefix} |{bar}| {percent}% {suffix}\033[0m', end=print_end, flush=True)
+
 def print_help():
     print("""
     Search text in multiple images using tesseract (an OCR — Optical Character Recognition — tool powered by Google.
@@ -258,6 +264,7 @@ def main():
                 summary[keyword]["paths"] += [image_file_path]
                 summary[keyword]["count"] += 1
 
+            print_progress_bar(index + 1, number_of_images, prefix="Progress:", suffix="Complete")
 
     summary["end_time"] = timeit.default_timer()
     summary["runtime"] = f"{int(summary.get('end_time') - summary.get('start_time'))} seconds"
