@@ -6,6 +6,8 @@ import getopt
 import locale
 import os
 import sys
+import timeit
+import filetype
 
 class MessageDisplay:
     MESSAGES = {
@@ -194,6 +196,21 @@ def extract_cli_args():
         print_help()
         sys.exit(1)
 
+def get_images_in_dir(folder: str,recursive:bool=False):
+    image_files = []
+    with os.scandir(folder) as images_folder:
+        for entry in images_folder:
+            if not os.path.isdir(entry) and not entry.name.startswith("."):
+                ft = filetype.guess(entry.path)
+                if ft.extension in ("png", "jpg", "jpeg", "gif"):
+                    image_files.append(entry.path)
+            elif os.path.isdir(entry) and recursive:
+                for img in get_images_in_dir(entry.path):
+                    image_files.append(img)
+                
+    return image_files
+
+
 def print_help():
     print("""
     Search text in multiple images using tesseract (an OCR — Optical Character Recognition — tool powered by Google.
@@ -214,7 +231,18 @@ def print_help():
     """)
             
 def main():
-    print_help()
+    init_args(OPTIONS)
+    summary = {}
+    images = get_images_in_dir(OPTIONS["directory"],OPTIONS["recursive"])
+    number_of_images = len(images)
+    summary["total_images"] = number_of_images
+    summary["start_time"] = timeit.default_timer()
+    summary["keywords"] = OPTIONS["keywords"]
+    for keyword in OPTIONS["keywords"]:
+        summary[keyword] = {}
+        summary[keyword]["count"] = 0
+        summary[keyword]["paths"] = []
+    
 
 
 if __name__ == "__main__":
