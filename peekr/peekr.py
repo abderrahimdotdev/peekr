@@ -3,9 +3,17 @@
 
     
 import getopt
-import os
+import locale
 import sys
 
+OPTIONS: dict[str,str] = {
+        # Default options
+        "ui-lang": locale.getlocale()[0].split("_")[0],
+        "lang":"eng",
+        "interacetive":False,
+        "case-sensitive":False,
+        "recursive":False,
+        }
 
 def init_args(options:dict[str,str]):
     
