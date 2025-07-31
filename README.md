@@ -28,30 +28,27 @@ cd peekr
 
 ### 2. Create a virtual environment
 ```
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 ### 3. Install Python dependencies
 ```bash
-pip3 install -r requirements.txt
-# or
-pip3 install uv
+pip install -r requirements.txt
 ```
 
 ## 🛠️ Usage
 Run the tool from the command line to perform OCR and search for text in images.
 
 ```bash
-uv run -m peekr --directory /path/to/images --keyword "word1, word2"
-# or
-python3 -m peekr --directory /path/to/images --keyword "word1, word2"
+python -m peekr --directory /path/to/images --keyword "word1, word2"
 ```
+
 To run in interactive mode:
 ``` bash
-python peekr.py -I 
+python -m peekr --interactive
 # or
-python peekr.py --interactive
+python -m peekr -I
 ```
 
 
