@@ -344,7 +344,7 @@ def print_headline(msg: str):
 
 def print_help():
     print("""
-    Search text in multiple images using tesseract (an OCR — Optical Character Recognition — tool powered by Google.
+    A Python tool to perform Optical Character Recognition (OCR) in a directory of images and search for specific text or phrases within the extracted text.
 
     Usage:
         peekr.py [options]
