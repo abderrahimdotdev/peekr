@@ -152,6 +152,7 @@ class InteractiveArgsHandler:
         self.__get_recursive_search(options)
         self.__get_keywords(options)
         self.__is_case_sensitive(options)
+        self.__get_destination_folder(options)
         
 
     def __get_images_folder(self,options:dict[str,str]):
@@ -172,7 +173,11 @@ class InteractiveArgsHandler:
         keywords = keywords.split(",")
         if "" in keywords:
             keywords.remove("")
-        options["keywords"] = keywords
+            
+        cleaned_keywords = []
+        for k in keywords:
+            cleaned_keywords.append(k.lstrip(" ").rstrip(" "))
+        options["keywords"] = cleaned_keywords
         print()
 
     def __is_case_sensitive(self,options:dict[str,str]):
@@ -195,6 +200,14 @@ class InteractiveArgsHandler:
         if answer in MessageDisplay.prompt("valid_answers").get("yes"):
             options["recursive"] = True
         print()
+
+    def __get_destination_folder(self,options:dict[str, str]):
+        print_headline(MessageDisplay.prompt('output'))
+        folder_name = normalize_path(input(">> ").strip(" "))
+        while len(folder_name) == 0 or os.path.isdir(folder_name):
+            print(MessageDisplay.error('output'))
+            folder_name = input(">> ").strip(" ")
+        options["destination"] = folder_name
     
         
     
@@ -235,7 +248,10 @@ def init_args(options:dict[str,str]):
                 keywords = val.split(",")
                 if "" in keywords:
                     keywords.remove("")
-                options["keywords"] = keywords
+                cleaned_keywords = []
+                for k in keywords:
+                    cleaned_keywords.append(k.lstrip(" ").rstrip(" "))
+                options["keywords"] = cleaned_keywords
             case "-o", "--output":
                 normalized_path = normalize_path(val)
                 if os.path.isdir(normalized_path):
