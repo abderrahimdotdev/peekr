@@ -289,7 +289,7 @@ def get_images_in_dir(folder: str,recursive:bool=False):
         for entry in images_folder:
             if not os.path.isdir(entry) and not entry.name.startswith("."):
                 ft = filetype.guess(entry.path)
-                if ft.extension in ("png", "jpg", "jpeg", "gif"):
+                if ft is not None and ft.extension in ("png", "jpg", "jpeg", "gif"):
                     image_files.append(entry.path)
             elif os.path.isdir(entry) and recursive:
                 for img in get_images_in_dir(entry.path):
